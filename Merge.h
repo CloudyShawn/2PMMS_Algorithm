@@ -24,9 +24,6 @@ typedef struct sortingManager {
 	long totalPartitions;
 } SortingManager;
 
-/*
-int makeRun (SortingManager manager); //sorts each partition in turn, writes it to a temp disk file, returns zero on success
-*/
 /**
 Phase 2. Multiway merge
 **/
@@ -52,7 +49,7 @@ typedef struct MergeManager { //Bookkeeping: keeps track of all necessary variab
 	InputBuffer *inputBuffers; //array of buffers to buffer separate runs
 } MergeManager;
 
-/*
+
 int mergeRuns (MergeManager *merger); //merges all runs into a single sorted list
 int initInputBuffers(MergeManager *merger); //initial fill of input buffers with elements of each run
 int initHeap(MergeManager *merger); //inserts into heap one element from each buffer - to keep the smallest on top
@@ -64,5 +61,3 @@ int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord); //inse
 int getTopHeapElement (MergeManager *merger, HeapRecord *result); //removes smallest element from the heap, and restores heap order
 int addToOutputBuffer(MergeManager *merger, Record * newRecord); //adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer
 int flushOutputBuffer(MergeManager *merger);
-
-*/
