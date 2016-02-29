@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     return (-1);
   }
 
+  /* split file into seperate run files */
   int i;
   char output_filename[10];
   long records_per_run = run_size / sizeof(Record);
@@ -49,8 +50,14 @@ int main(int argc, char *argv[])
     FILE *out_file = fopen(output_filename, "wb");
     fwrite(sorter->partitionBuffer, sizeof(Record), sorter->totalRecords, out_file);
     fclose(out_file);
+
+    sorter->totalRecords = fread(sorter->partitionBuffer, sizeof(Record), records_per_run, sorter->inputFile);
   }
-  
+
+  /* free all allocated, unneeded variables and close file pointers */
+  free(sorter->partitionBuffer);
+  fclose(sorter->inputFile);
+
   return 0;
 }
 
