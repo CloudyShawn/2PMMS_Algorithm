@@ -35,6 +35,7 @@ typedef struct InputBuffer { //Input buffer - responsible for a single run
 	long totalElements; //how many total elements in buffer - may be different from max capacity
 	int done; //set to 1 when the run is finished
 	Record *buffer;  //array of Records
+	char *filename;
 } InputBuffer;
 
 typedef struct MergeManager { //Bookkeeping: keeps track of all necessary variables during external merge
@@ -47,7 +48,6 @@ typedef struct MergeManager { //Bookkeeping: keeps track of all necessary variab
 	int currentPositionInOutputBuffer;  //where to add next element in output buffer
 	int outputBufferCapacity; //how many elements max can it hold
 	InputBuffer *inputBuffers; //array of buffers to buffer separate runs
-	long totalPartitions; //Number of partitions
 } MergeManager;
 
 
