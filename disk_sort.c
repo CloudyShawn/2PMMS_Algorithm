@@ -204,5 +204,7 @@ int addToOutputBuffer(MergeManager *merger, Record * newRecord)
 
 int flushOutputBuffer(MergeManager *merger)
 {
+  fwrite(merger->outputBuffer, sizeof(Record), merger->currentPositionInOutputBuffer, merger->outputFP);
+  merger->currentPositionInOutputBuffer = 0;
   return 0;
 }
