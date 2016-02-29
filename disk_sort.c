@@ -91,11 +91,21 @@ int mergeRuns (MergeManager *merger)
 /* initial fill of input buffers with elements of each run */
 int initInputBuffers(MergeManager *merger)
 {
-  // int i;
-  // for (i=0;i<len(merger->inputBuffers);i++)
-  // {
-  //   printf("%s", merger->inputBuffers[i]);
-  // }
+  int i;
+  for (i=0;i<merger->heapCapacity;i++)
+  {
+    printf("%s", merger->inputBuffers[i].filename);
+      /* open text file for reading */
+    if ( ! (merger->inputFP = fopen ( merger->inputBuffers[i].filename , "rb" )))
+    {
+      printf ("Could not open file \"%s\" for reading \n", merger->inputBuffers[i].filename);
+      return (-1);
+    }
+    merger->inputBuffers[i].totalElements = fread(merger->inputBuffers[i].buffer, sizeof(Record), merger->inputBuffers[i].capacity, merger->inputFP);
+    merger->inputBuffers[i].currentPositionInFile = ftell(merger->inputFP);
+    
+    fclose (merger->inputFP);
+  }
   return 0;
 
 }
