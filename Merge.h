@@ -1,3 +1,5 @@
+#define OUTPUT_FILE_PREFIX "_run"
+
 typedef struct record {
 	int uid1;
 	int uid2;
@@ -23,7 +25,7 @@ typedef struct SortingManager {
 
 /*
 int makeRun (SortingManager manager); //sorts each partition in turn, writes it to a temp disk file, returns zero on success
-
+*/
 /**
 Phase 2. Multiway merge
 **/
