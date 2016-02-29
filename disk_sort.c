@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
   /* split file into seperate run files */
   int i;
   char filename[10];
+  InputBuffer *inputBuffers = (InputBuffer *)(calloc(sorter->totalPartitions, sizeof(InputBuffer)));
   long records_per_run = run_size / sizeof(Record);
   sorter->partitionBuffer = (Record *)(calloc(records_per_run, sizeof(Record)));
   sorter->totalRecords = fread(sorter->partitionBuffer, sizeof(Record), records_per_run, sorter->inputFile);
@@ -53,6 +54,10 @@ int main(int argc, char *argv[])
     fwrite(sorter->partitionBuffer, sizeof(Record), sorter->totalRecords, out_file);
     fclose(out_file);
 
+    inputBuffers[i].filename = calloc(strlen(filename) + 1, sizeof(char));
+    strcpy(inputBuffers[i].filename, filename);
+    inputBuffers[i].runLength = sorter->totalRecords * sizeof(Record);
+    
     sorter->totalRecords = fread(sorter->partitionBuffer, sizeof(Record), records_per_run, sorter->inputFile);
   }
 
@@ -63,7 +68,35 @@ int main(int argc, char *argv[])
   /*****************************************************************************
   ***     PHASE 2 (2.3) Merging files
   *****************************************************************************/
+  /* Figure out new buffer capacities */
+  long buffer_size = atoi(argv[2]) / (sorter->totalPartitions + 1);
+  buffer_size -= buffer_size % atoi(argv[3]);
+  if(buffer_size == 0)
+  {
+    printf("Too many runs for the amount of memory given\n");
+    return (-1);
+  }
 
+  MergeManager *merger = (MergeManager *)(calloc(1, sizeof(MergeManager)));
+  merger->heapCapacity = sorter->totalPartitions;
+  merger->heap = (HeapRecord *)(calloc(merger->heapCapacity, sizeof(HeapRecord)));
+  merger->heapSize = 0;
+  merger->inputFP = NULL;
+  merger->outputFP = fopen(OUTPUT_FILE_NAME, "wb");
+  merger->outputBuffer = (Record *)(calloc(buffer_size / sizeof(Record), sizeof(Record)));
+  merger->currentPositionInOutputBuffer = 0;
+  merger->outputBufferCapacity = buffer_size / sizeof(Record);
+  merger->inputBuffers = inputBuffers;
+
+  for(i = 0; i < merger->heapCapacity; i++)
+  {
+    merger->inputBuffers[i].capacity = merger->outputBufferCapacity;
+    merger->inputBuffers[i].currentPositionInFile = 0;
+    merger->inputBuffers[i].currentBufferPosition = 0;
+    merger->inputBuffers[i].done = 0;
+  }
+
+  initInputBuffers(merger);
 
   return 0;
 }
@@ -102,7 +135,7 @@ int initInputBuffers(MergeManager *merger)
     }
     merger->inputBuffers[i].totalElements = fread(merger->inputBuffers[i].buffer, sizeof(Record), merger->inputBuffers[i].capacity, merger->inputFP);
     merger->inputBuffers[i].currentPositionInFile = ftell(merger->inputFP);
-    
+
     fclose (merger->inputFP);
   }
   return 0;
