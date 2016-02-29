@@ -6,4 +6,4 @@ all: disk_sort
 disk_sort: disk_sort.c
 	$(CC) -o $@ $^ $(CFLAGS)
 clean:
-	rm disk_sort run_*
+	rm disk_sort run_* reverse_edges.dat

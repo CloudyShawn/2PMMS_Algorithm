@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
   merger->heapSize = 0;
   merger->inputFP = NULL;
   merger->outputFP = fopen(OUTPUT_FILE_NAME, "wb");
-  merger->outputBuffer = (Record *)(calloc(buffer_size / sizeof(Record)));
+  merger->outputBuffer = (Record *)(calloc(buffer_size / sizeof(Record), sizeof(Record)));
   merger->currentPositionInOutputBuffer = 0;
   merger->outputBufferCapacity = buffer_size / sizeof(Record);
   merger->inputBuffers = inputBuffers;
@@ -136,7 +136,7 @@ int initInputBuffers(MergeManager *merger)
     }
     merger->inputBuffers[i].totalElements = fread(merger->inputBuffers[i].buffer, sizeof(Record), merger->inputBuffers[i].capacity, merger->inputFP);
     merger->inputBuffers[i].currentPositionInFile = ftell(merger->inputFP);
-    
+
     fclose (merger->inputFP);
   }
   return 0;
