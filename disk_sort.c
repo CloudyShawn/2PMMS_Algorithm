@@ -94,8 +94,7 @@ int initInputBuffers(MergeManager *merger)
   int i;
   for (i=0;i<merger->heapCapacity;i++)
   {
-    printf("%s", merger->inputBuffers[i].filename);
-      /* open text file for reading */
+    /* open text file for reading */
     if ( ! (merger->inputFP = fopen ( merger->inputBuffers[i].filename , "rb" )))
     {
       printf ("Could not open file \"%s\" for reading \n", merger->inputBuffers[i].filename);
@@ -107,7 +106,6 @@ int initInputBuffers(MergeManager *merger)
     fclose (merger->inputFP);
   }
   return 0;
-
 }
 
 /* inserts into heap one element from each buffer - to keep the smallest on top */
