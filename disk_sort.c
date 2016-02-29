@@ -1,13 +1,3 @@
-/*
-	* Arguments:
-	* 1 - an array to sort
-	* 2 - size of an array
-	* 3 - size of each array element
-	* 4 - function to compare two elements of the array
-
-	qsort (buffer, total_records, sizeof(Record), compare);
-*******************************************************************/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,105 +5,70 @@
 
 int main(int argc, char *argv[])
 {
+  /* Check inputs */
   if(argc != 5)
   {
     printf("Usage: disk_sort <name of the input file> <total mem in bytes> <block size> <number of runs>\n");
-    return 0;
+    return (-1);
   }
 
-  /* Set up variables */
-  int i;
-  char *input_filename = argv[1];
-  int total_mem = atoi(argv[2]);
-  int block_size = atoi(argv[3]);
-  int num_runs = atoi(argv[4]);
-
-  /* Read in input file */
-  FILE *in_file;
-  FILE *out_file;
-  if(!(in_file = fopen(input_filename, "rb")))
+  /* PHASE 1 (2.2) Splitting original file */
+  /* set up sorting manager */
+  SortingManager *sorter = (SortingManager *)(calloc(1, sizeof(SortingManager)));
+  sorter->totalPartitions = atoi(argv[4]);
+  sorter->totalRecords = 0;
+  if(!(sorter->inputFile = fopen(argv[1], "rb")))
   {
-    printf("Could not open file %s for reading\n", input_filename);
+    printf("Could not open file %s for reading\n", argv[1]);
     return -1;
   }
 
-  /* Calculate chunk size and round to block size */
-  int chunk_size = total_mem / (num_runs);
-  if(chunk_size % block_size > 0)
+  /* Calculate if runs are too big for given memory */
+  fseek(sorter->inputFile, 0, SEEK_END);
+  long file_size = ftell(sorter->inputFile);
+  fseek(sorter->inputFile, 0, SEEK_SET);
+
+  long run_size = file_size / sorter->totalPartitions;
+  run_size -= run_size % sizeof(Record);
+  if(run_size > atoi(argv[2]))
   {
-    chunk_size -= chunk_size % block_size;
-  }
-  /* Calculate records in each chunk (used for buffer and runs) */
-  int records_per_chunk = chunk_size / sizeof(Record);
-  if(records_per_chunk == 0)
-  {
-    printf("Too many runs or block size too large\n");
+    printf("Run sizes are too large to fit into given memory space\n");
     return (-1);
   }
 
-  /*****************************************************************************
-  ***   PHASE 1 (2.2)
-  *****************************************************************************/
-  Record *in_buffer = (Record *)(calloc(records_per_chunk, sizeof(Record)));
-
-  char i_string[10];
-  int read_records = fread(in_buffer, sizeof(Record), records_per_chunk, in_file);
-  for(i = 0; i < num_runs; i++)
+  int i;
+  char output_filename[10];
+  long records_per_run = run_size / sizeof(Record);
+  sorter->partitionBuffer = (Record *)(calloc(records_per_run, sizeof(Record)));
+  sorter->totalRecords = fread(sorter->partitionBuffer, sizeof(Record), records_per_run, sorter->inputFile);
+  for(i = 0; i < sorter->totalPartitions; i++)
   {
-    sprintf(i_string, "%d", i);
-    qsort(in_buffer, records_per_chunk, sizeof(Record), compare);
+    qsort(sorter->partitionBuffer, sorter->totalRecords, sizeof(Record), compare);
 
-    out_file = fopen(strcat(i_string, OUTPUT_FILE_SUFFIX), "wb");
-    fwrite(in_buffer, sizeof(Record), read_records, out_file);
+    sprintf(output_filename, "%s%d", OUTPUT_FILE_PREFIX, i);
+    FILE *out_file = fopen(output_filename, "wb");
+    fwrite(sorter->partitionBuffer, sizeof(Record), sorter->totalRecords, out_file);
     fclose(out_file);
-
-    read_records = fread(in_buffer, sizeof(Record), records_per_chunk, in_file);
   }
 
-  fclose(in_file);
-  free(in_buffer);
+  /*
+  long max_records_per_run = ((atoi(argv[2]) / atoi(argv[4])) - ((atoi(argv[2]) / atoi(argv[4])) % atoi(argv[3]))) / sizeof(Record);
 
-  if(read_records > 0)
-  {
-    printf("Total given memory is insufficient\n");
-    return (-1);
-  }
 
-  /*****************************************************************************
-  ***     PHASE 2 (2.3)
-  *****************************************************************************/
-  /* Arrays to hold buffers, file pointers, and indexes in array */
-  FILE *run_files[num_runs];
-  int cur_i[num_runs];
-  Record *runs[num_runs];
-  Record *out_buffer;
-
-  /* Compute new chunk size with accounting for output buffer */
-  chunk_size = total_mem / (num_runs + 1);
-  if(chunk_size % block_size > 0)
-  {
-    chunk_size -= chunk_size % block_size;
-  }
-  /* Calculate records in each chunk (used for buffer and runs) */
-  records_per_chunk = chunk_size / sizeof(Record);
-  if(records_per_chunk == 0)
+  if(sorter->totalRecords == 0)
   {
     printf("Too many runs or block size too large\n");
     return (-1);
   }
 
-  /* Allocate all buffers */
-  for(i = 0; i < num_runs; i++)
+  char output_filename[10];
+  int i;
+  sorter->totalRecords = fread(in_buffer, sizeof(Record), records_per_chunk, in_file);
+  for(i = 0; i < sorter->totalPartitions; i++)
   {
-    runs[i] = (Record *)(calloc(records_per_chunk, sizeof(Record)));
-    cur_i[i] = 0;
 
-    sprintf(i_string, "%d", i);
-    run_files[i] = fopen(strcat(i_string, OUTPUT_FILE_SUFFIX), "rb");
   }
-  out_file = fopen(OUTPUT_FILE_NAME, "wb");
-  out_buffer = (Record *)(calloc(records_per_chunk, sizeof(Record)));
-
+  */
   return 0;
 }
 

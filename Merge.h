@@ -1,4 +1,4 @@
-#define OUTPUT_FILE_SUFFIX "_run"
+#define OUTPUT_FILE_PREFIX "run_"
 #define OUTPUT_FILE_NAME "reverse_edges.dat"
 
 typedef struct record {
@@ -17,7 +17,7 @@ int compare (const void *a, const void *b);
 /**
 Phase 1. Sorting of records in each partition
 **/
-typedef struct SortingManager {
+typedef struct sortingManager {
 	Record * partitionBuffer; //working buffer to be sorted
 	FILE * inputFile; //pointer to the input file - opened and closed only once
 	long totalRecords; //total records in current partition
