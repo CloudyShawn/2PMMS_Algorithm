@@ -119,51 +119,67 @@ int compare (const void *a, const void *b)
 /* merges all runs into a single sorted list */
 int mergeRuns (MergeManager *merger)
 {
-
+  return 0;
 }
 /* initial fill of input buffers with elements of each run */
 int initInputBuffers(MergeManager *merger)
 {
+  int i;
+  for (i=0;i<merger->heapCapacity;i++)
+  {
+    printf("%s", merger->inputBuffers[i].filename);
+      /* open text file for reading */
+    if ( ! (merger->inputFP = fopen ( merger->inputBuffers[i].filename , "rb" )))
+    {
+      printf ("Could not open file \"%s\" for reading \n", merger->inputBuffers[i].filename);
+      return (-1);
+    }
+    merger->inputBuffers[i].totalElements = fread(merger->inputBuffers[i].buffer, sizeof(Record), merger->inputBuffers[i].capacity, merger->inputFP);
+    merger->inputBuffers[i].currentPositionInFile = ftell(merger->inputFP);
+    
+    fclose (merger->inputFP);
+  }
+  return 0;
 
 }
 
 /* inserts into heap one element from each buffer - to keep the smallest on top */
 int initHeap(MergeManager *merger)
 {
-
+  return 0;
 }
 
 /* reads the next element from an input buffer */
 int getNextRecord (MergeManager *merger, int run_id, Record *result)
 {
-
+  return 0;
 }
 
 /* uploads next part of a run from disk if necessary by calling refillBuffer */
 int refillBuffer(MergeManager *merger, int run_id)
 {
-
+  return 0;
 }
 
 /* inserts next element from run run_id into heap */
 int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 {
-
+  return 0;
 }
 
 /* removes smallest element from the heap, and restores heap order */
 int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 {
-
+  return 0;
 }
 
 /* adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer */
 int addToOutputBuffer(MergeManager *merger, Record * newRecord)
 {
-
+  return 0;
 }
 
 int flushOutputBuffer(MergeManager *merger)
 {
-
+  return 0;
 }
