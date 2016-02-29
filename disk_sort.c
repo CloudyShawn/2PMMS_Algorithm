@@ -156,6 +156,18 @@ int getNextRecord (MergeManager *merger, int run_id, Record *result)
 /* uploads next part of a run from disk if necessary by calling refillBuffer */
 int refillBuffer(MergeManager *merger, int run_id)
 {
+  if(merger->inputBuffers[run_id].done == 0)
+  {
+      merger->inputFP = fopen(merger->inputBuffers[run_id].filename, "rb");
+      fseek(merger->inputFP, merger->inputBuffers[run_id].currentPositionInFile, SEEK_SET);
+      merger->inputBuffers[run_id].totalElements = fread(merger->inputBuffers[run_id].buffer, sizeof(Record), merger->inputBuffers[run_id].capacity, merger->inputFP);
+      merger->inputBuffers[run_id].currentPositionInFile = ftell(merger->inputFP);
+      if(merger->inputBuffers[run_id].currentPositionInFile == merger->inputBuffers[run_id].runLength)
+      {
+        merger->inputBuffers[run_id].done = 1;
+      }
+      merger->inputBuffers[run_id].currentBufferPosition = 0;
+  }
   return 0;
 }
 
