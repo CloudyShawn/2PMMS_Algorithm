@@ -47,6 +47,7 @@ typedef struct MergeManager { //Bookkeeping: keeps track of all necessary variab
 	int currentPositionInOutputBuffer;  //where to add next element in output buffer
 	int outputBufferCapacity; //how many elements max can it hold
 	InputBuffer *inputBuffers; //array of buffers to buffer separate runs
+	long totalPartitions; //Number of partitions
 } MergeManager;
 
 
