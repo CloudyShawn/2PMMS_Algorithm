@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     inputBuffers[i].filename = calloc(strlen(filename) + 1, sizeof(char));
     strcpy(inputBuffers[i].filename, filename);
     inputBuffers[i].runLength = sorter->totalRecords * sizeof(Record);
-    
+
     sorter->totalRecords = fread(sorter->partitionBuffer, sizeof(Record), records_per_run, sorter->inputFile);
   }
 
@@ -94,9 +94,12 @@ int main(int argc, char *argv[])
     merger->inputBuffers[i].currentPositionInFile = 0;
     merger->inputBuffers[i].currentBufferPosition = 0;
     merger->inputBuffers[i].done = 0;
+    merger->inputBuffers[i].buffer = (Record *)(calloc(merger->inputBuffers[i].capacity, sizeof(Record)));
   }
 
   initInputBuffers(merger);
+  initHeap(merger);
+
 
   return 0;
 }
