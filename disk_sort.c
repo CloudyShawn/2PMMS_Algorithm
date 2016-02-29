@@ -50,25 +50,7 @@ int main(int argc, char *argv[])
     fwrite(sorter->partitionBuffer, sizeof(Record), sorter->totalRecords, out_file);
     fclose(out_file);
   }
-
-  /*
-  long max_records_per_run = ((atoi(argv[2]) / atoi(argv[4])) - ((atoi(argv[2]) / atoi(argv[4])) % atoi(argv[3]))) / sizeof(Record);
-
-
-  if(sorter->totalRecords == 0)
-  {
-    printf("Too many runs or block size too large\n");
-    return (-1);
-  }
-
-  char output_filename[10];
-  int i;
-  sorter->totalRecords = fread(in_buffer, sizeof(Record), records_per_chunk, in_file);
-  for(i = 0; i < sorter->totalPartitions; i++)
-  {
-
-  }
-  */
+  
   return 0;
 }
 
