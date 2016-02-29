@@ -1,4 +1,5 @@
-#define OUTPUT_FILE_PREFIX "_run"
+#define OUTPUT_FILE_SUFFIX "_run"
+#define OUTPUT_FILE_NAME "reverse_edges.dat"
 
 typedef struct record {
 	int uid1;
