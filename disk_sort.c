@@ -210,7 +210,7 @@ int initHeap(MergeManager *merger)
     merger->inputBuffers[i].currentBufferPosition++;
     merger->heapSize++;
   }
-  qsort(merger->heap, merger->heapCapacity, sizeof(HeapRecord), compare);
+  qsort(merger->heap, merger->heapSize, sizeof(HeapRecord), compare);
   return 0;
 }
 
@@ -255,7 +255,7 @@ int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
   merger->heap[0].uid2 = newRecord->uid2;
   merger->heap[0].run_id = run_id;
 
-  qsort(merger->heap, merger->heapCapacity, sizeof(HeapRecord), compare);
+  qsort(merger->heap, merger->heapSize, sizeof(HeapRecord), compare);
   return 0;
 }
 
@@ -293,5 +293,6 @@ int flushOutputBuffer(MergeManager *merger)
 /* drops capacity of heap and removes top element */
 int removeRun(MergeManager *merger)
 {
+
   return 0;
 }
