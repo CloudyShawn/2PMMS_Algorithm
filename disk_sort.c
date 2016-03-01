@@ -238,53 +238,67 @@ int refillBuffer(MergeManager *merger, int run_id)
 /* inserts next element from run run_id into heap */
 int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 {
+  /* Record all new record data into first slot of heap (recently removed slot) */
   merger->heap[0].uid1 = newRecord->uid1;
   merger->heap[0].uid2 = newRecord->uid2;
   merger->heap[0].run_id = run_id;
 
+  /* resort heap */
   qsort(merger->heap, merger->heapSize, sizeof(HeapRecord), compare);
+  
   return 0;
 }
 
 /* removes smallest element from the heap, and restores heap order */
 int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 {
+  /* record all values of first item in heap into output result variable */
   result->uid1 = merger->heap[0].uid1;
   result->uid2 = merger->heap[0].uid2;
   result->run_id = merger->heap[0].run_id;
+
   return 0;
 }
 
 /* adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer */
 int addToOutputBuffer(MergeManager *merger, HeapRecord *newRecord)
 {
+  /* Copy new record to output buffer */
   merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid1;
   merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid2;
 
+  /* increment output buffer index */
   merger->currentPositionInOutputBuffer++;
 
+  /* Flush output buffer if buffer is full */
   if (merger->currentPositionInOutputBuffer == merger->outputBufferCapacity)
   {
     flushOutputBuffer(merger);
   }
+
   return 0;
 }
 
 int flushOutputBuffer(MergeManager *merger)
 {
+  /* Write all contents of output buffer out and reset index */
   fwrite(merger->outputBuffer, sizeof(Record), merger->currentPositionInOutputBuffer, merger->outputFP);
   merger->currentPositionInOutputBuffer = 0;
+
   return 0;
 }
 
 /* drops capacity of heap and removes top element */
 int removeRun(MergeManager *merger)
 {
+  /* Remove temporary run files */
   remove(merger->inputBuffers[merger->heap[0].run_id].filename);
   printf("Removed %s%d\n", OUTPUT_FILE_PREFIX, merger->heap[0].run_id);
 
+  /* subtract from heapsize to remove a run */
   merger->heapSize--;
 
+  /* copy info from final heap item to first removed heap item */
   merger->heap[0].uid1 = merger->heap[merger->heapSize].uid1;
   merger->heap[0].uid2 = merger->heap[merger->heapSize].uid2;
   merger->heap[0].run_id = merger->heap[merger->heapSize].run_id;
