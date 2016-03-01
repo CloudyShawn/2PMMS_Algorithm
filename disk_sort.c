@@ -145,6 +145,10 @@ int mergeRuns (MergeManager *merger)
     {
       getNextRecord(merger, head.run_id, &new_record);
     }
+    else
+    {
+      removeRun(merger);
+    }
 
     /*
 		result = getNextRecord (merger, runID, &next);
