@@ -279,6 +279,10 @@ int flushOutputBuffer(MergeManager *merger)
 /* drops capacity of heap and removes top element */
 int removeRun(MergeManager *merger)
 {
+  merger->heap[0].uid1 = merger->heap[merger->heapSize].uid1;
+  merger->heap[0].uid2 = merger->heap[merger->heapSize].uid2;
+  merger->heap[0].run_id = merger->heap[merger->heapSize].run_id;
 
+  merger->heapSize--;
   return 0;
 }
