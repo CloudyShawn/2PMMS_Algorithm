@@ -228,6 +228,16 @@ int initHeap(MergeManager *merger)
 /* reads the next element from an input buffer */
 int getNextRecord (MergeManager *merger, int run_id, Record *result)
 {
+  result->uid1 = merger->inputBuffers[run_id].buffer[merger->inputBuffers[run_id].currentBufferPosition].uid1;
+  result->uid2 = merger->inputBuffers[run_id].buffer[merger->inputBuffers[run_id].currentBufferPosition].uid2;
+
+  merger->inputBuffers[run_id].currentBufferPosition++;
+
+  if (merger->inputBuffers[run_id].currentBufferPosition == merger->inputBuffers[run_id].capacity)
+  {
+    refillBuffer(merger, run_id);
+  }
+  
   return 0;
 }
 
