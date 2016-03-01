@@ -259,6 +259,11 @@ int refillBuffer(MergeManager *merger, int run_id)
 /* inserts next element from run run_id into heap */
 int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 {
+  merger->heap[0].uid1 = newRecord->uid1;
+  merger->heap[0].uid2 = newRecord->uid2;
+  merger->heap[0].run_id = run_id;
+
+  qsort(merger->heap, merger->heapCapacity, sizeof(HeapRecord), compare);
   return 0;
 }
 
