@@ -60,5 +60,5 @@ int refillBuffer(MergeManager *merger, int run_id);
 
 int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord); //inserts next element from run run_id into heap
 int getTopHeapElement (MergeManager *merger, HeapRecord *result); //removes smallest element from the heap, and restores heap order
-int addToOutputBuffer(MergeManager *merger, Record * newRecord); //adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer
+int addToOutputBuffer(MergeManager *merger, HeapRecord * newRecord); //adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer
 int flushOutputBuffer(MergeManager *merger);

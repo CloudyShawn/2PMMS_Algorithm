@@ -121,8 +121,6 @@ int compare (const void *a, const void *b)
 /* merges all runs into a single sorted list */
 int mergeRuns (MergeManager *merger)
 {
-	int  result;
-
 	/* 1. go in the loop through all input files and fill-in initial buffers */
 	if (initInputBuffers(merger)!=0)
   {
@@ -188,7 +186,6 @@ int mergeRuns (MergeManager *merger)
 	return 0;
 }
 
-}
 /* initial fill of input buffers with elements of each run */
 int initInputBuffers(MergeManager *merger)
 {
@@ -274,6 +271,15 @@ int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 /* adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer */
 int addToOutputBuffer(MergeManager *merger, HeapRecord *newRecord)
 {
+  merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid1;
+  merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid2;
+
+  merger->currentPositionInOutputBuffer++;
+
+  if (merger->currentPositionInOutputBuffer == merger->outputBufferCapacity)
+  {
+    flushOutputBuffer(merger);
+  }
   return 0;
 }
 
