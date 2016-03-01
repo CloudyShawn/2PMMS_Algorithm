@@ -97,8 +97,7 @@ int main(int argc, char *argv[])
     merger->inputBuffers[i].buffer = (Record *)(calloc(merger->inputBuffers[i].capacity, sizeof(Record)));
   }
 
-  initInputBuffers(merger);
-  initHeap(merger);
+  mergeRuns(merger);
 
 
   return 0;
@@ -122,7 +121,73 @@ int compare (const void *a, const void *b)
 /* merges all runs into a single sorted list */
 int mergeRuns (MergeManager *merger)
 {
-  return 0;
+	int  result;
+
+	/* 1. go in the loop through all input files and fill-in initial buffers */
+	if (initInputBuffers(merger)!=0)
+  {
+		return 1;
+  }
+
+	/*2. Initialize heap with 1 element from each buffer */
+	if (initHeap(merger)!=0)
+  {
+		return 1;
+  }
+
+  /* heap is not empty */
+	while (merger->heapSize > 0)
+  {
+		HeapRecord head;
+    getTopHeapElement(merger, &head);
+    addToOutputBuffer(merger, &head);
+
+    Record new_record;
+    getNextRecord(merger, head.run_id, &new_record);
+
+    /*
+		int runID;
+
+		if (getTopHeapElement (merger, &smallest) != 0)
+    {
+			return 1;
+    }
+
+		runID = smallest.run_id;
+
+		merger->outputBuffer[merger->currentPositionInOutputBuffer++]=smallest;
+
+		result = getNextRecord (merger, runID, &next);
+
+		if(next != NULL)
+    {//next element exists
+			if(insertIntoHeap (merger, smallest.runID, &next)!=0)
+				return 1;
+		}
+		if(result==1) //error
+			return 1;
+
+		if(merger->currentPositionInOutputBuffer == merger-> outputBufferCapacity )
+    { //staying on the last slot of the output buffer - next will cause overflow
+			if(flushOutputBuffer(merger)!=0)
+				return 1;
+			merger->currentPositionInOutputBuffer=0;
+		}
+    */
+	}
+
+	/* flush what remains in output buffer */
+	if(merger->currentPositionInOutputBuffer >0)
+  {
+		if(flushOutputBuffer(merger)!=0)
+    {
+			return 1;
+    }
+	}
+
+	return 0;
+}
+
 }
 /* initial fill of input buffers with elements of each run */
 int initInputBuffers(MergeManager *merger)
@@ -197,7 +262,7 @@ int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 }
 
 /* adds next smallest element to the output buffer, flushes buffer if full by calling flushOutputBuffer */
-int addToOutputBuffer(MergeManager *merger, Record * newRecord)
+int addToOutputBuffer(MergeManager *merger, HeapRecord *newRecord)
 {
   return 0;
 }
