@@ -123,8 +123,8 @@ int compare (const void *a, const void *b)
 int mergeRuns (MergeManager *merger)
 {
 	/* Fill initial buffers and fill in heap from each buffer */
-	if (initInputBuffers(merger)!=0)
-	if (initHeap(merger)!=0)
+	initInputBuffers(merger);
+	initHeap(merger);
 
   /* Keep going until heap is empty */
 	while(merger->heapSize > 0)
@@ -144,7 +144,7 @@ int mergeRuns (MergeManager *merger)
     }
     else
     {
-      /* Remove run from heap, causing heapsize to drop */
+      /* Remove run from heap, causing heapSize to drop */
       removeRun(merger);
     }
 	}
