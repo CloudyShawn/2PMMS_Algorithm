@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     FILE *out_file = fopen(filename, "wb");
     fwrite(sorter->partitionBuffer, sizeof(Record), sorter->totalRecords, out_file);
     fclose(out_file);
+    printf("%s written to disk\n", filename);
 
     inputBuffers[i].filename = calloc(strlen(filename) + 1, sizeof(char));
     strcpy(inputBuffers[i].filename, filename);
@@ -121,33 +122,29 @@ int compare (const void *a, const void *b)
 /* merges all runs into a single sorted list */
 int mergeRuns (MergeManager *merger)
 {
-	/* 1. go in the loop through all input files and fill-in initial buffers */
+	/* Fill initial buffers and fill in heap from each buffer */
 	if (initInputBuffers(merger)!=0)
-  {
-		return 1;
-  }
-
-	/*2. Initialize heap with 1 element from each buffer */
 	if (initHeap(merger)!=0)
-  {
-		return 1;
-  }
 
-  /* heap is not empty */
-	while (merger->heapSize > 0)
+  /* Keep going until heap is empty */
+	while(merger->heapSize > 0)
   {
+    /* save head of heap and append to output buffer */
 		HeapRecord head;
     getTopHeapElement(merger, &head);
     addToOutputBuffer(merger, &head);
 
-    Record new_record;
+    /* Check if run from removed record on heap has any more records left */
     if(merger->inputBuffers[head.run_id].currentBufferPosition < merger->inputBuffers[head.run_id].totalElements)
     {
+      /* Get next record from run and insert it into heap */
+      Record new_record;
       getNextRecord(merger, head.run_id, &new_record);
       insertIntoHeap(merger, head.run_id, &new_record);
     }
     else
     {
+      /* Remove run from heap, causing heapsize to drop */
       removeRun(merger);
     }
 	}
@@ -155,10 +152,7 @@ int mergeRuns (MergeManager *merger)
 	/* flush what remains in output buffer */
 	if(merger->currentPositionInOutputBuffer > 0)
   {
-		if(flushOutputBuffer(merger)!=0)
-    {
-			return 1;
-    }
+		flushOutputBuffer(merger);
 	}
 
 	return 0;
@@ -167,20 +161,27 @@ int mergeRuns (MergeManager *merger)
 /* initial fill of input buffers with elements of each run */
 int initInputBuffers(MergeManager *merger)
 {
+  /* Loop through all runs and fill in buffers */
   int i;
-  for (i=0;i<merger->heapCapacity;i++)
+  for(i = 0; i < merger->heapCapacity; i++)
   {
+    /* easier name to use for current buffer instead of merger->inputBuffers[i] */
+    InputBuffer *cur_buffer = &(merger->inputBuffers[i]);
+
     /* open text file for reading */
-    if ( ! (merger->inputFP = fopen ( merger->inputBuffers[i].filename , "rb" )))
+    if(!(merger->inputFP = fopen(cur_buffer->filename, "rb")))
     {
-      printf ("Could not open file \"%s\" for reading \n", merger->inputBuffers[i].filename);
+      printf ("Could not open file \"%s\" for reading \n", cur_buffer->filename);
       return (-1);
     }
-    merger->inputBuffers[i].totalElements = fread(merger->inputBuffers[i].buffer, sizeof(Record), merger->inputBuffers[i].capacity, merger->inputFP);
-    merger->inputBuffers[i].currentPositionInFile = ftell(merger->inputFP);
+    /* Read into buffer and save total read records */
+    cur_buffer->totalElements = fread(cur_buffer->buffer, sizeof(Record), cur_buffer->capacity, merger->inputFP);
+    /* set new position to read in file */
+    cur_buffer->currentPositionInFile = ftell(merger->inputFP);
 
     fclose (merger->inputFP);
   }
+
   return 0;
 }
 
@@ -188,7 +189,7 @@ int initInputBuffers(MergeManager *merger)
 int initHeap(MergeManager *merger)
 {
   int i;
-  for (i=0;i<merger->heapCapacity;i++)
+  for(i=0; i < merger->heapCapacity; i++)
   {
     merger->heap[i].uid1 = merger->inputBuffers[i].buffer[merger->inputBuffers[i].currentBufferPosition].uid1;
     merger->heap[i].uid2 = merger->inputBuffers[i].buffer[merger->inputBuffers[i].currentBufferPosition].uid2;
@@ -208,7 +209,7 @@ int getNextRecord (MergeManager *merger, int run_id, Record *result)
 
   merger->inputBuffers[run_id].currentBufferPosition++;
 
-  if (merger->inputBuffers[run_id].currentBufferPosition == merger->inputBuffers[run_id].capacity)
+  if(merger->inputBuffers[run_id].currentBufferPosition == merger->inputBuffers[run_id].totalElements)
   {
     refillBuffer(merger, run_id);
   }
@@ -279,10 +280,11 @@ int flushOutputBuffer(MergeManager *merger)
 /* drops capacity of heap and removes top element */
 int removeRun(MergeManager *merger)
 {
+  merger->heapSize--;
+
   merger->heap[0].uid1 = merger->heap[merger->heapSize].uid1;
   merger->heap[0].uid2 = merger->heap[merger->heapSize].uid2;
   merger->heap[0].run_id = merger->heap[merger->heapSize].run_id;
 
-  merger->heapSize--;
   return 0;
 }
