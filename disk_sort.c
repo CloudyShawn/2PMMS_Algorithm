@@ -265,6 +265,9 @@ int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 /* removes smallest element from the heap, and restores heap order */
 int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 {
+  result->uid1 = merger->heap[0].uid1;
+  result->uid2 = merger->heap[0].uid2;
+  result->run_id = merger->heap[0].run_id;
   return 0;
 }
 
