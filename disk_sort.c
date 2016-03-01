@@ -141,20 +141,12 @@ int mergeRuns (MergeManager *merger)
     addToOutputBuffer(merger, &head);
 
     Record new_record;
-    getNextRecord(merger, head.run_id, &new_record);
-
-    /*
-		int runID;
-
-		if (getTopHeapElement (merger, &smallest) != 0)
+    if(merger->inputBuffers[head.run_id].done == 0)
     {
-			return 1;
+      getNextRecord(merger, head.run_id, &new_record);
     }
 
-		runID = smallest.run_id;
-
-		merger->outputBuffer[merger->currentPositionInOutputBuffer++]=smallest;
-
+    /*
 		result = getNextRecord (merger, runID, &next);
 
 		if(next != NULL)
@@ -234,7 +226,7 @@ int getNextRecord (MergeManager *merger, int run_id, Record *result)
   {
     refillBuffer(merger, run_id);
   }
-  
+
   return 0;
 }
 
@@ -287,5 +279,11 @@ int flushOutputBuffer(MergeManager *merger)
 {
   fwrite(merger->outputBuffer, sizeof(Record), merger->currentPositionInOutputBuffer, merger->outputFP);
   merger->currentPositionInOutputBuffer = 0;
+  return 0;
+}
+
+/* drops capacity of heap and removes top element */
+int removeRun(MergeManager *merger)
+{
   return 0;
 }
