@@ -251,12 +251,20 @@ int refillBuffer(MergeManager *merger, int run_id)
 /* inserts next element from run run_id into heap */
 int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 {
+  merger->heap[0].uid1 = newRecord->uid1;
+  merger->heap[0].uid2 = newRecord->uid2;
+  merger->heap[0].run_id = run_id;
+
+  qsort(merger->heap, merger->heapCapacity, sizeof(HeapRecord), compare);
   return 0;
 }
 
 /* removes smallest element from the heap, and restores heap order */
 int getTopHeapElement (MergeManager *merger, HeapRecord *result)
 {
+  result->uid1 = merger->heap[0].uid1;
+  result->uid2 = merger->heap[0].uid2;
+  result->run_id = merger->heap[0].run_id;
   return 0;
 }
 
