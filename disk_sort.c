@@ -141,37 +141,19 @@ int mergeRuns (MergeManager *merger)
     addToOutputBuffer(merger, &head);
 
     Record new_record;
-    if(merger->inputBuffers[head.run_id].done == 0)
+    if(merger->inputBuffers[head.run_id].currentBufferPosition < merger->inputBuffers[head.run_id].totalElements)
     {
       getNextRecord(merger, head.run_id, &new_record);
+      insertIntoHeap(merger, head.run_id, &new_record);
     }
     else
     {
       removeRun(merger);
     }
-
-    /*
-		result = getNextRecord (merger, runID, &next);
-
-		if(next != NULL)
-    {//next element exists
-			if(insertIntoHeap (merger, smallest.runID, &next)!=0)
-				return 1;
-		}
-		if(result==1) //error
-			return 1;
-
-		if(merger->currentPositionInOutputBuffer == merger-> outputBufferCapacity )
-    { //staying on the last slot of the output buffer - next will cause overflow
-			if(flushOutputBuffer(merger)!=0)
-				return 1;
-			merger->currentPositionInOutputBuffer=0;
-		}
-    */
 	}
 
 	/* flush what remains in output buffer */
-	if(merger->currentPositionInOutputBuffer >0)
+	if(merger->currentPositionInOutputBuffer > 0)
   {
 		if(flushOutputBuffer(merger)!=0)
     {
