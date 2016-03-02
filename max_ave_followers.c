@@ -120,6 +120,14 @@ int compare (const void *a, const void *b)
 /* merges all runs into a single sorted list */
 int mergeRuns (MergeManager *merger)
 {
+  /* Variables for calculating max/average followers */
+  long cur_uid = 0;
+  long total_uid = 0;
+  long cur_followers = 0;
+  long total_followers = 0;
+  long max_followed_uid = 0;
+  long max_followers = 0;
+
 	/* Fill initial buffers and fill in heap from each buffer */
 	initInputBuffers(merger);
 	initHeap(merger);
@@ -127,8 +135,29 @@ int mergeRuns (MergeManager *merger)
   /* Keep going until heap is empty */
 	while(merger->heapSize > 0)
   {
-    /* save head of heap and append to output buffer */
 		HeapRecord head;
+
+    /* add info to stats */
+    /* Check if uid has changed */
+    if(cur_uid != head.uid2)
+    {
+      /* check if they have beaten follower record */
+      if(cur_followers > max_followers)
+      {
+        max_followers = cur_followers;
+        max_followed_uid = cur_uid;
+      }
+
+      cur_uid = head.uid2;
+      cur_followers = 0;
+      total_uid++;
+    }
+
+    /* increment stats */
+    cur_followers++;
+    total_followers++;
+
+    /* save head of heap and append to output buffer */
     getTopHeapElement(merger, &head);
     addToOutputBuffer(merger, &head);
 
@@ -152,6 +181,10 @@ int mergeRuns (MergeManager *merger)
   {
 		flushOutputBuffer(merger);
 	}
+
+  /* Print stats */
+  printf("Average Followers = %.3f\n", (double)total_followers / (double)total_uid);
+  printf("Max followers = UID:%li, Followers:%li\n", max_followed_uid, max_followers);
 
 	return 0;
 }
