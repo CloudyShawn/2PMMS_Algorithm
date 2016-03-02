@@ -6,6 +6,9 @@ all: disk_sort
 disk_sort: disk_sort.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
+max_ave_followers: max_ave_followers.c
+	$(CC) -o $@ $^ $(CFLAGS)
+
 test: file_reader.c
 	$(CC) -o file_reader $^ $(CFLAGS)
 
