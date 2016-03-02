@@ -245,7 +245,7 @@ int insertIntoHeap (MergeManager *merger, int run_id, Record *newRecord)
 
   /* resort heap */
   qsort(merger->heap, merger->heapSize, sizeof(HeapRecord), compare);
-  
+
   return 0;
 }
 
@@ -265,7 +265,7 @@ int addToOutputBuffer(MergeManager *merger, HeapRecord *newRecord)
 {
   /* Copy new record to output buffer */
   merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid1;
-  merger->outputBuffer[merger->currentPositionInOutputBuffer].uid1 = newRecord->uid2;
+  merger->outputBuffer[merger->currentPositionInOutputBuffer].uid2 = newRecord->uid2;
 
   /* increment output buffer index */
   merger->currentPositionInOutputBuffer++;
