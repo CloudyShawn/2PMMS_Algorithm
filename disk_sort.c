@@ -114,9 +114,7 @@ int main(int argc, char *argv[])
 */
 int compare (const void *a, const void *b)
 {
-  int a_uid = ((const Record*)a)->uid2;
-  int b_uid = ((const Record*)b)->uid2;
-  return (a_uid - b_uid);
+  return (((const Record *)a)->uid2 - ((const Record *)b)->uid2);
 }
 
 /* merges all runs into a single sorted list */
@@ -188,27 +186,35 @@ int initInputBuffers(MergeManager *merger)
 /* inserts into heap one element from each buffer - to keep the smallest on top */
 int initHeap(MergeManager *merger)
 {
+  /* loop through k (heap capacity) runs */
   int i;
   for(i=0; i < merger->heapCapacity; i++)
   {
+    /* Add first element to heap */
     merger->heap[i].uid1 = merger->inputBuffers[i].buffer[merger->inputBuffers[i].currentBufferPosition].uid1;
     merger->heap[i].uid2 = merger->inputBuffers[i].buffer[merger->inputBuffers[i].currentBufferPosition].uid2;
     merger->heap[i].run_id = i;
     merger->inputBuffers[i].currentBufferPosition++;
     merger->heapSize++;
   }
+
+  /* sort filled heap */
   qsort(merger->heap, merger->heapSize, sizeof(HeapRecord), compare);
+
   return 0;
 }
 
 /* reads the next element from an input buffer */
 int getNextRecord (MergeManager *merger, int run_id, Record *result)
 {
+  /* save next element in run # run_id to output variable results */
   result->uid1 = merger->inputBuffers[run_id].buffer[merger->inputBuffers[run_id].currentBufferPosition].uid1;
   result->uid2 = merger->inputBuffers[run_id].buffer[merger->inputBuffers[run_id].currentBufferPosition].uid2;
 
+  /* increment buffer position */
   merger->inputBuffers[run_id].currentBufferPosition++;
 
+  /* refill buffer if the end is reached */
   if(merger->inputBuffers[run_id].currentBufferPosition == merger->inputBuffers[run_id].totalElements)
   {
     refillBuffer(merger, run_id);
@@ -220,18 +226,27 @@ int getNextRecord (MergeManager *merger, int run_id, Record *result)
 /* uploads next part of a run from disk if necessary by calling refillBuffer */
 int refillBuffer(MergeManager *merger, int run_id)
 {
+  /* only refill if records are left in file */
   if(merger->inputBuffers[run_id].done == 0)
   {
-      merger->inputFP = fopen(merger->inputBuffers[run_id].filename, "rb");
-      fseek(merger->inputFP, merger->inputBuffers[run_id].currentPositionInFile, SEEK_SET);
-      merger->inputBuffers[run_id].totalElements = fread(merger->inputBuffers[run_id].buffer, sizeof(Record), merger->inputBuffers[run_id].capacity, merger->inputFP);
-      merger->inputBuffers[run_id].currentPositionInFile = ftell(merger->inputFP);
-      if(merger->inputBuffers[run_id].currentPositionInFile == merger->inputBuffers[run_id].runLength)
-      {
-        merger->inputBuffers[run_id].done = 1;
-      }
-      merger->inputBuffers[run_id].currentBufferPosition = 0;
+    /* open file pointer for reading at saved location */
+    merger->inputFP = fopen(merger->inputBuffers[run_id].filename, "rb");
+    fseek(merger->inputFP, merger->inputBuffers[run_id].currentPositionInFile, SEEK_SET);
+
+    /* fill in buffer and save new file position */
+    merger->inputBuffers[run_id].totalElements = fread(merger->inputBuffers[run_id].buffer, sizeof(Record), merger->inputBuffers[run_id].capacity, merger->inputFP);
+    merger->inputBuffers[run_id].currentPositionInFile = ftell(merger->inputFP);
+
+    /* Flag as done if file is completely read */
+    if(merger->inputBuffers[run_id].currentPositionInFile == merger->inputBuffers[run_id].runLength)
+    {
+      merger->inputBuffers[run_id].done = 1;
+    }
+
+    /* Reset buffer index */
+    merger->inputBuffers[run_id].currentBufferPosition = 0;
   }
+
   return 0;
 }
 
